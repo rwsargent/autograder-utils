@@ -1,6 +1,5 @@
 package autograderutils;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,21 +36,21 @@ public class AutograderResult {
 		missedPoints.put(group, missedPoints.get(group) + pointsEarned);
 	}
 	
-	public void printSummary(PrintStream out) {
+	public String buildSummary() {
 		// print total first
+		StringBuilder out = new StringBuilder();
 		int score = calculateScore();
-		out.println("Total: " + score + " / " + totalPoints);
-		out.println();
+		out.append("Total: " + score + " / " + totalPoints + "\n\n");
 		
 		// per group
 		for(String group : totalPointsPerGroup.keySet()) {
 			int totalPoints = totalPointsPerGroup.get(group);
 			Integer missed = missedPoints.get(group);
-			out.println(group + "\t\t" + (totalPoints - missed) + " / " + totalPoints);
-			errorMessages.get(group).forEach(out::println);
-			
-			out.println();
+			out.append(group + "\t\t" + (totalPoints - missed) + " / " + totalPoints + "\n");
+			errorMessages.get(group).forEach(msg -> out.append(msg + "\n"));
+			out.append("\n");
 		}
+		return out.toString();
 	}
 
 	private int calculateScore() {
@@ -60,5 +59,13 @@ public class AutograderResult {
 			missedTotal += missedPoint.getValue();
 		}
 		return totalPoints - missedTotal;
+	}
+	
+	public int getScore() {
+		return calculateScore();
+	}
+	
+	public int getTotal() {
+		return totalPoints;
 	}
 }
