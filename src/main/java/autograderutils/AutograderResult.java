@@ -40,17 +40,20 @@ public class AutograderResult {
 	public void printSummary(PrintStream out) {
 		// print total first
 		int score = calculateScore();
-		out.println("Total: " + score + " / " + totalPoints);
+		out.println("Your submission received " + score + " out of " + totalPoints + " points possible.\n" + 
+                    "Your canvas score will reflect this percentage.");
 		out.println();
+		
+		//Helpful hints incoming
+		out.println("<helpful hints here>");
+		out.println("-----");
 		
 		// per group
 		for(String group : totalPointsPerGroup.keySet()) {
 			int totalPoints = totalPointsPerGroup.get(group);
 			Integer missed = missedPoints.get(group);
-			out.println(group + "\t\t" + (totalPoints - missed) + " / " + totalPoints);
+			out.println(group + ":\t" + (totalPoints - missed) + " / " + totalPoints);
 			errorMessages.get(group).forEach(out::println);
-			
-			out.println();
 		}
 	}
 

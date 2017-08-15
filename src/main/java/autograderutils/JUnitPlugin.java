@@ -71,7 +71,7 @@ public class JUnitPlugin {
 			
 			autoResult.addFailure(groupName, errorMessage, missedPointsForTest);
 		}
-		return null;
+		return autoResult;
 	}
 
 	private Map<String, Integer> getGroups(Class<?> junitGradingClass) {
