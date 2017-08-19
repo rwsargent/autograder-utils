@@ -76,14 +76,28 @@ public class JUnitPlugin {
 
 	private Map<String, Integer> getGroups(Class<?> junitGradingClass) {
 		Map<String, Integer> groupToPoints = new HashMap<>();
-		Groups groups = junitGradingClass.getAnnotation(Groups.class);
-		for(Group group : groups.value()) {
+		Group[] groups = getGroupAnnotations(junitGradingClass);
+		
+		for(Group group : groups) {
 			groupToPoints.put(group.name(), group.totalPoints());
 		}
-		if(groups.value().length == 0) {
-			throw new IllegalStateException("The JUnit test case being run by the autograder doesn't know its total points. Use the Group annotation");
-		}
+		
 		return groupToPoints;
+	}
+
+	private Group[] getGroupAnnotations(Class<?> junitGradingClass) {
+		Groups groupsAnno = junitGradingClass.getAnnotation(Groups.class);
+		Group[] groups = null; 
+		if(groupsAnno == null) {
+			Group group = junitGradingClass.getAnnotation(Group.class);
+			if(group == null) {
+				throw new IllegalStateException("There are no Autograder group annotations on " + junitGradingClass.getName());
+			}
+			groups =  new Group[]{group};
+		} else {
+			groups = groupsAnno.value();
+		}
+		return groups;
 	}
 
 	private boolean isAnnotationPresent(Description description, Annotation anno) {
