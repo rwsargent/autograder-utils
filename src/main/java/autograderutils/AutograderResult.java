@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.junit.runner.Result;
+import org.junit.runner.notification.Failure;
+
 /**
  * Wraps the JUnit result
  * @author ryans
@@ -15,10 +18,13 @@ public class AutograderResult {
 	private Map<String, Integer> totalPointsPerGroup;
 	private Map<String, Integer> missedPoints;
 	private HashMap<String, List<String>> errorMessages;
+	private Result junitResult;
 	
 	int totalPoints = 0;
 
-	public AutograderResult(Map<String, Integer> totalPoinsPossiblePerGroup) {
+	public AutograderResult(Map<String, Integer> totalPoinsPossiblePerGroup, Result junitResult) {
+		this.junitResult = junitResult;
+		
 		this.totalPointsPerGroup = totalPoinsPossiblePerGroup;
 		for(int points : this.totalPointsPerGroup.values()) {
 			totalPoints += points; 
@@ -36,6 +42,18 @@ public class AutograderResult {
 		missedPoints.put(group, missedPoints.get(group) + pointsEarned);
 	}
 	
+	public String getFeedback() {
+		StringBuilder out = new StringBuilder();
+		out.append(getScoreLine());
+		maybeAddHelpfulHints(out);
+		return out.toString();
+	}
+	
+	public String getScoreLine() {
+		return "Your submission received " + calculateScore() + " out of " + totalPoints + " points possible.\n" + 
+                "Your canvas score will reflect this percentage.\n";
+	}
+	
 	public String buildSummary() {
 		// print total first
 		StringBuilder out = new StringBuilder();
@@ -43,8 +61,7 @@ public class AutograderResult {
 		out.append("Your submission received " + score + " out of " + totalPoints + " points possible.\n" + 
                     "Your canvas score will reflect this percentage.\n");
 		
-		//Helpful hints incoming
-		out.append("<helpful hints here>");
+		maybeAddHelpfulHints(out);
 		out.append("-----");
 		
 		// per group
@@ -56,6 +73,27 @@ public class AutograderResult {
 			out.append("\n");
 		}
 		return out.toString();
+	}
+
+	private void maybeAddHelpfulHints(StringBuilder out) {
+		for(Failure failure : junitResult.getFailures()) {
+			if(exceptCauseIs(failure.getException(), ClassCastException.class)) {
+				out.append(failure.getMessage() + "\n");
+			}
+			if(failure.getMessage().contains("Unresolved compilation")) {
+				out.append(failure.getMessage() + "\n");
+			}
+		}
+	}
+
+	private boolean exceptCauseIs(Throwable exception, Class<? extends Throwable> causeException) {
+		if(causeException.isInstance(exception)) {
+			return true;
+		}
+		if(exception.getCause() == null) {
+			return false;
+		}
+		return exceptCauseIs(exception.getCause(), causeException); 
 	}
 
 	private int calculateScore() {

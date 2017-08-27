@@ -51,7 +51,7 @@ public class JUnitPlugin {
 		JUnitCore core = new JUnitCore();
 		core.addListener(new RunListener());
 		Result junitResult = core.run(junitGradingClass);
-		AutograderResult autoResult = new AutograderResult(totalGroupPoints);
+		AutograderResult autoResult = new AutograderResult(totalGroupPoints, junitResult);
 		
 		for(Failure failure : junitResult.getFailures()) {
 			Autograder autoAnno = failure.getDescription().getAnnotation(Autograder.class);
