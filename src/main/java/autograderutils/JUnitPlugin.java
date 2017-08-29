@@ -86,8 +86,8 @@ public class JUnitPlugin {
 	}
 
 	private Group[] getGroupAnnotations(Class<?> junitGradingClass) {
-		Groups groupsAnno = junitGradingClass.getAnnotation(Groups.class);
 		Group[] groups = null; 
+		Groups groupsAnno = junitGradingClass.getAnnotation(Groups.class);
 		if(groupsAnno == null) {
 			Group group = junitGradingClass.getAnnotation(Group.class);
 			if(group == null) {

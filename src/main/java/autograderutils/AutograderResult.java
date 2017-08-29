@@ -80,7 +80,7 @@ public class AutograderResult {
 			if(exceptCauseIs(failure.getException(), ClassCastException.class)) {
 				out.append(failure.getMessage() + "\n");
 			}
-			if(failure.getMessage().contains("Unresolved compilation")) {
+			if(failure.getMessage() != null && failure.getMessage().contains("Unresolved compilation")) {
 				out.append(failure.getMessage() + "\n");
 			}
 		}
