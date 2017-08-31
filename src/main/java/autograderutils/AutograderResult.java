@@ -40,6 +40,7 @@ public class AutograderResult {
 	
 	public void addFailure(String group, String message, int pointsEarned) {
 		missedPoints.put(group, missedPoints.get(group) + pointsEarned);
+		errorMessages.get(group).add(message);
 	}
 	
 	public String getFeedback() {
@@ -62,7 +63,7 @@ public class AutograderResult {
                     "Your canvas score will reflect this percentage.\n");
 		
 		maybeAddHelpfulHints(out);
-		out.append("-----");
+		out.append("-----\n");
 		
 		// per group
 		for(String group : totalPointsPerGroup.keySet()) {
@@ -76,13 +77,19 @@ public class AutograderResult {
 	}
 
 	private void maybeAddHelpfulHints(StringBuilder out) {
+		StringBuilder localbuilder = new StringBuilder();
 		for(Failure failure : junitResult.getFailures()) {
 			if(exceptCauseIs(failure.getException(), ClassCastException.class)) {
-				out.append(failure.getMessage() + "\n");
-			}
+				localbuilder.append(failure.getTestHeader() + ":" + failure.getMessage() + "\n");
+			}	
 			if(failure.getMessage() != null && failure.getMessage().contains("Unresolved compilation")) {
-				out.append(failure.getMessage() + "\n");
+				localbuilder.append(failure.getTestHeader() + ":" + failure.getMessage() + "\n");
 			}
+		}
+		
+		if(localbuilder.length() > 0 ) {
+			out.append("\nHere are some of the tests that failed, and why\n");
+			out.append(localbuilder.toString());
 		}
 	}
 
@@ -97,6 +104,9 @@ public class AutograderResult {
 	}
 
 	private int calculateScore() {
+		if(junitResult.getRunCount() <= 1) {
+			return 0;
+		}
 		int missedTotal = 0;
 		for(Entry<String, Integer> missedPoint: missedPoints.entrySet()) {
 			missedTotal += missedPoint.getValue();
