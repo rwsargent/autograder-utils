@@ -11,7 +11,7 @@ import java.lang.annotation.RetentionPolicy;
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Autograder {
-	int pointsPossible();
+	int pointsPossible() default 1;
 	String group() default "Assignment";
 	int pointsOnFailure() default 0;
 }

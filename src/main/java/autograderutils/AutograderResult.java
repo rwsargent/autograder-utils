@@ -58,14 +58,18 @@ public class AutograderResult {
 	public String buildSummary() {
 		// print total first
 		StringBuilder out = new StringBuilder();
-		int score = calculateScore();
-		out.append("Your submission received " + score + " out of " + totalPoints + " points possible.\n" + 
-                    "Your canvas score will reflect this percentage.\n");
+		out.append(getScoreLine());
 		
 		maybeAddHelpfulHints(out);
 		out.append("-----\n");
 		
 		// per group
+		out.append(buildTestResults());
+		return out.toString();
+	}
+
+	public String buildTestResults() {
+		StringBuilder out = new StringBuilder();
 		for(String group : totalPointsPerGroup.keySet()) {
 			int totalPoints = totalPointsPerGroup.get(group);
 			Integer missed = missedPoints.get(group);
