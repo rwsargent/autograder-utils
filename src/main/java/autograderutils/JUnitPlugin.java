@@ -4,7 +4,6 @@ package autograderutils;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;
@@ -20,20 +19,9 @@ import autograderutils.annotations.Groups;
  * Used to run a JUnit test suite and pipe its results to stdout. 
  * These path arguments must be absolute due to the nature of the Autograder grading portion.
  * 
- * group.properties is a properties file of groupName=pointsPossible, that the Autograder annotation will key off of.
- * An example might look like this:
- * mergesort=20
- * quicksort=20
- * insertion_sort=20
- * 
  * If no groups are neccessary, the second argument needs to be the number of total possible pints in the grader script. 
  * The @Autograder annotation will default to "Autograder," but the extra.properites file is always necessary.
  *
- * The extra.properties file is a similar key=value pair where the key is category that isn't tested by JUnit, i.e.
- * test=10
- * style=10
- * analysis=30
- * 
  * @author ryans
  *
  */
@@ -41,12 +29,6 @@ public class JUnitPlugin {
 	public AutograderResult grade(Class<?> junitGradingClass) {
 		// Grab the toal number of points from 
 		Map<String, Integer> totalGroupPoints = getGroups(junitGradingClass);
-		
-		// zero out points
-		Map<String, Integer> scorePerGroup = new HashMap<>(totalGroupPoints);
-		for( Entry<String, Integer> entry : scorePerGroup.entrySet()) {
-			entry.setValue(0);
-		}
 		
 		JUnitCore core = new JUnitCore();
 		core.addListener(new RunListener());
@@ -60,16 +42,21 @@ public class JUnitPlugin {
 				continue;
 			}
 			String groupName = autoAnno.group();
-			int missedPointsForTest = getMissedPointsForTest(failure, autoAnno);
 			String errorMessage = "TEST FAILED: " + failure.getDescription().getMethodName();
 
-			if(failure.getMessage() != null) {
-				errorMessage += " - " + failure.getMessage();
-			} if(failure.getException() instanceof NullPointerException) { // for some reason, JUnit doesn't capture NPEs
+			if(failure.getException() instanceof ArrayIndexOutOfBoundsException) {
+				errorMessage += " - ArrayIndexOutOfBoundException ";
+			} else if(failure.getException() instanceof NullPointerException) { // for some reason, JUnit doesn't capture NPEs
 				errorMessage += " - NullPointerException. " + failure.getException().getStackTrace()[0].toString();
+			} else if (failure.getException() instanceof IndexOutOfBoundsException) {
+				errorMessage += " - IndexOutOfBoundsException " + failure.getException().getStackTrace()[0].toString();
 			}
 			
-			autoResult.addFailure(groupName, errorMessage, missedPointsForTest);
+			if(failure.getMessage() != null) {
+				errorMessage += " - " + failure.getMessage();
+			}
+			
+			autoResult.addFailure(groupName, errorMessage, getMissedPointsForTest(failure, autoAnno));
 		}
 		return autoResult;
 	}
@@ -117,4 +104,5 @@ public class JUnitPlugin {
 		}
 		return autoAnno.pointsPossible() - autoAnno.pointsOnFailure();
 	}
+	
 }
