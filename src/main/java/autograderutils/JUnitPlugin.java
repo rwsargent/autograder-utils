@@ -47,9 +47,11 @@ public class JUnitPlugin {
 			if(failure.getException() instanceof ArrayIndexOutOfBoundsException) {
 				errorMessage += " - ArrayIndexOutOfBoundException ";
 			} else if(failure.getException() instanceof NullPointerException) { // for some reason, JUnit doesn't capture NPEs
-				errorMessage += " - NullPointerException. " + failure.getException().getStackTrace()[0].toString();
+				errorMessage += " - NullPointerException. ";
+				errorMessage = maybeAddFirstLineOfStackTrace(failure, errorMessage);
 			} else if (failure.getException() instanceof IndexOutOfBoundsException) {
 				errorMessage += " - IndexOutOfBoundsException " + failure.getException().getStackTrace()[0].toString();
+				errorMessage = maybeAddFirstLineOfStackTrace(failure, errorMessage);
 			}
 			
 			if(failure.getMessage() != null) {
@@ -59,6 +61,14 @@ public class JUnitPlugin {
 			autoResult.addFailure(groupName, errorMessage, getMissedPointsForTest(failure, autoAnno));
 		}
 		return autoResult;
+	}
+
+	private String maybeAddFirstLineOfStackTrace(Failure failure, String errorMessage) {
+		StackTraceElement[] stackTrace = failure.getException().getStackTrace();
+		if(stackTrace != null && stackTrace.length > 0) {
+			errorMessage += stackTrace[0].toString();
+		}
+		return errorMessage;
 	}
 
 	private Map<String, Integer> getGroups(Class<?> junitGradingClass) {
