@@ -38,6 +38,7 @@ public class JUnitPlugin {
 		for(Failure failure : junitResult.getFailures()) {
 			Autograder autoAnno = failure.getDescription().getAnnotation(Autograder.class);
 			if(!isAnnotationPresent(failure.getDescription(), autoAnno)) {
+				
 				System.err.println("Annotation not present on " + failure.getTestHeader());
 				continue;
 			}
@@ -58,7 +59,7 @@ public class JUnitPlugin {
 				errorMessage += " - " + failure.getMessage();
 			}
 			
-			autoResult.addFailure(groupName, errorMessage, getMissedPointsForTest(failure, autoAnno));
+			autoResult.addTestFailure(groupName, errorMessage, getMissedPointsForTest(failure, autoAnno));
 		}
 		return autoResult;
 	}

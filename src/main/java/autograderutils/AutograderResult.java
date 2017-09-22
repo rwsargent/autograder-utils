@@ -20,6 +20,8 @@ public class AutograderResult {
 	private HashMap<String, List<String>> errorMessages;
 	private Result junitResult;
 	
+	private List<String> failureMessages;
+	
 	int totalPoints = 0;
 
 	public AutograderResult(Map<String, Integer> totalPoinsPossiblePerGroup, Result junitResult) {
@@ -36,9 +38,14 @@ public class AutograderResult {
 			
 			errorMessages.put(entry.getKey(), new ArrayList<>());
 		}
+		
+		failureMessages = new ArrayList<>();
 	}
 	
-	public void addFailure(String group, String message, int pointsEarned) {
+	public void addTestFailure(String group, String message, int pointsEarned) {
+		if(missedPoints.get(group) == null) {
+			throw new RuntimeException("The group " + group + " is not annotated on the Grader");
+		}
 		missedPoints.put(group, missedPoints.get(group) + pointsEarned);
 		errorMessages.get(group).add(message);
 	}
