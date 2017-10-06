@@ -1,4 +1,4 @@
-package autograderutils;
+package autograderutils.results;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,18 +13,15 @@ import org.junit.runner.notification.Failure;
  * Wraps the JUnit result
  * @author ryans
  */
-public class AutograderResult {
-
+public class JUnitAutograderResult extends AutograderResult {
 	private Map<String, Integer> totalPointsPerGroup;
 	private Map<String, Integer> missedPoints;
 	private HashMap<String, List<String>> errorMessages;
 	private Result junitResult;
 	
-	private List<String> failureMessages;
-	
 	int totalPoints = 0;
 
-	public AutograderResult(Map<String, Integer> totalPoinsPossiblePerGroup, Result junitResult) {
+	public JUnitAutograderResult(Map<String, Integer> totalPoinsPossiblePerGroup, Result junitResult) {
 		this.junitResult = junitResult;
 		
 		this.totalPointsPerGroup = totalPoinsPossiblePerGroup;
@@ -38,8 +35,6 @@ public class AutograderResult {
 			
 			errorMessages.put(entry.getKey(), new ArrayList<>());
 		}
-		
-		failureMessages = new ArrayList<>();
 	}
 	
 	public void addTestFailure(String group, String message, int pointsEarned) {
@@ -62,7 +57,7 @@ public class AutograderResult {
                 "Your canvas score will reflect this percentage.\n";
 	}
 	
-	public String buildSummary() {
+	public String getSummary() {
 		// print total first
 		StringBuilder out = new StringBuilder();
 		out.append(getScoreLine());
@@ -131,5 +126,18 @@ public class AutograderResult {
 	
 	public int getTotal() {
 		return totalPoints;
+	}
+
+	@Override
+	public String getTestResults() {
+		return buildTestResults();
+	}
+
+	public void failed(String errorMessage) {
+		for(Entry<String, Integer> ptsPerGroup : totalPointsPerGroup.entrySet()) {
+			missedPoints.put(ptsPerGroup.getKey(), ptsPerGroup.getValue());
+			
+			errorMessages.get(ptsPerGroup.getKey()).add(errorMessage);
+		}
 	}
 }
