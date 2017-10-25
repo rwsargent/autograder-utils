@@ -90,7 +90,7 @@ public class JUnitAutograderResult extends AutograderResult {
 			}
 			if(exceptCauseIs(failure.getException(), NoSuchMethodError.class) 
 					|| exceptCauseIs(failure.getException(), NoSuchMethodException.class)) {
-				localbuilder.append("Missing Method: " + failure.getMessage());
+				localbuilder.append("Missing Method: " + failure.getMessage() + "\n");
 			}
 			if(failure.getMessage() != null && failure.getMessage().contains("Unresolved compilation")) {
 				localbuilder.append(failure.getTestHeader() + ":" + failure.getMessage() + "\n");
