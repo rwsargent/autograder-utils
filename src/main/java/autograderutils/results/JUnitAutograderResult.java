@@ -87,7 +87,11 @@ public class JUnitAutograderResult extends AutograderResult {
 		for(Failure failure : junitResult.getFailures()) {
 			if(exceptCauseIs(failure.getException(), ClassCastException.class)) {
 				localbuilder.append(failure.getTestHeader() + ":" + failure.getMessage() + "\n");
-			}	
+			}
+			if(exceptCauseIs(failure.getException(), NoSuchMethodError.class) 
+					|| exceptCauseIs(failure.getException(), NoSuchMethodException.class)) {
+				localbuilder.append("Missing Method: " + failure.getMessage());
+			}
 			if(failure.getMessage() != null && failure.getMessage().contains("Unresolved compilation")) {
 				localbuilder.append(failure.getTestHeader() + ":" + failure.getMessage() + "\n");
 			}

@@ -1,6 +1,9 @@
 package autograderutils;
 
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -60,7 +63,7 @@ public class JUnitPlugin {
 			if(failure.getMessage() != null) {
 				errorMessage += " - " + failure.getMessage();
 			} else {
-				errorMessage += "@ " + maybeGetFirstLineOfStackTrace(failure);
+				errorMessage += " @ " + maybeGetFirstLineOfStackTrace(failure);
 			}
 			
 			autoResult.addTestFailure(groupName, errorMessage, getMissedPointsForTest(failure, autoAnno));
@@ -135,7 +138,10 @@ public class JUnitPlugin {
 			System.err.println("Could not find the grader class (" + args[0] + ") needed!");
 			System.exit(-1);
 		}
-		JUnitPlugin plugin = new JUnitPlugin();
+		
+		PrintStream stdOut = System.out;
+		System.setOut(new PrintStream(new DevNull()));
+		
 		if(System.getProperty("java.security.policy") != null) {
 			System.setSecurityManager(new SecurityManager(){
 				@Override
@@ -144,10 +150,24 @@ public class JUnitPlugin {
 				}
 			});
 		}
+		
+		JUnitPlugin plugin = new JUnitPlugin();
 		JUnitAutograderResult result = plugin.grade(graderClass);
 		System.setSecurityManager(null);
-		System.out.println(result.getSummary());
+		System.setOut(stdOut);
+		stdOut.println(result.getSummary());
 		
 		System.exit(0); // yes I realize the irony. JUnit spins infinite threads, I have to manually kill the JVM. 
+	}
+	
+	private static class DevNull extends OutputStream {
+		@Override
+		public void write(int b) throws IOException {}
+		
+		@Override
+		public void write(byte[] b, int off, int len) throws IOException {}
+		
+		@Override
+		public void write(byte[] b) throws IOException {}
 	}
 }
