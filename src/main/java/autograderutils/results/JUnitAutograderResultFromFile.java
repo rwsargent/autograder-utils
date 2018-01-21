@@ -70,5 +70,10 @@ public class JUnitAutograderResultFromFile extends AutograderResult{
 	public String getTestResults() {
 		return testResults;
 	}
+
+	@Override
+	public int getNumberOfTests() {
+		return 0;
+	}
 	
 }

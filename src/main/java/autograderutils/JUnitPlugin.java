@@ -33,12 +33,13 @@ import autograderutils.results.JUnitAutograderResult;
 public class JUnitPlugin {
 	public JUnitAutograderResult grade(Class<?> junitGradingClass) {
 		// Grab the toal number of points from 
-		Map<String, Integer> totalGroupPoints = getGroups(junitGradingClass);
+//		Map<String, Integer> totalGroupPoints = getGroups(junitGradingClass);
 		
+		Metadata metadata = Metadata.from(junitGradingClass);
 		JUnitCore core = new JUnitCore();
 		core.addListener(new RunListener());
 		Result junitResult = core.run(junitGradingClass);
-		JUnitAutograderResult autoResult = new JUnitAutograderResult(totalGroupPoints, junitResult);
+		JUnitAutograderResult autoResult = new JUnitAutograderResult(metadata, junitResult);
 		
 		for(Failure failure : junitResult.getFailures()) { 
 			Autograder autoAnno = failure.getDescription().getAnnotation(Autograder.class);
@@ -46,7 +47,7 @@ public class JUnitPlugin {
 				System.err.println("Annotation not present on " + failure.getTestHeader());
 				if(failure.getTestHeader().contains("initializationError")) {
 					// JUnit couldn't run.
-					autoResult.failed("Could not run JUnit file. " + failure.getMessage());
+					autoResult.failed("Could not run JUnit file. " + failure.getTrace());
 				}
 				System.err.println(failure.getMessage());
 				System.err.println(failure.getTrace());

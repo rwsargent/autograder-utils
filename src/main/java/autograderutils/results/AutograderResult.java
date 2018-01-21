@@ -12,4 +12,5 @@ public abstract class AutograderResult {
 	
 	public abstract String getTestResults();
 	
+	public abstract int getNumberOfTests();
 }

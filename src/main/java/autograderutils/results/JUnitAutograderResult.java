@@ -9,6 +9,8 @@ import java.util.Map.Entry;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 
+import autograderutils.Metadata;
+
 /**
  * Wraps the JUnit result
  * @author ryans
@@ -19,7 +21,13 @@ public class JUnitAutograderResult extends AutograderResult {
 	private HashMap<String, List<String>> errorMessages;
 	private Result junitResult;
 	
+	int totalTests = 0;
 	int totalPoints = 0;
+	
+	public JUnitAutograderResult(Metadata metadata, Result junitResult) {
+		this(metadata.totalGroupPoints, junitResult);
+		totalTests = 0;
+	}
 
 	public JUnitAutograderResult(Map<String, Integer> totalPoinsPossiblePerGroup, Result junitResult) {
 		this.junitResult = junitResult;
@@ -143,5 +151,10 @@ public class JUnitAutograderResult extends AutograderResult {
 			
 			errorMessages.get(ptsPerGroup.getKey()).add(errorMessage);
 		}
+	}
+
+	@Override
+	public int getNumberOfTests() {
+		return this.totalTests;
 	}
 }
