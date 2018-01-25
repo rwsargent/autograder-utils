@@ -23,6 +23,7 @@ public class JUnitAutograderResult extends AutograderResult {
 	
 	int totalTests = 0;
 	int totalPoints = 0;
+	private ArrayList<String> failures;
 	
 	public JUnitAutograderResult(Metadata metadata, Result junitResult) {
 		this(metadata.totalGroupPoints, junitResult);
@@ -31,7 +32,7 @@ public class JUnitAutograderResult extends AutograderResult {
 
 	public JUnitAutograderResult(Map<String, Integer> totalPoinsPossiblePerGroup, Result junitResult) {
 		this.junitResult = junitResult;
-		
+		failures = new ArrayList<>();
 		this.totalPointsPerGroup = totalPoinsPossiblePerGroup;
 		for(int points : this.totalPointsPerGroup.values()) {
 			totalPoints += points; 
@@ -55,8 +56,15 @@ public class JUnitAutograderResult extends AutograderResult {
 	
 	public String getFeedback() {
 		StringBuilder out = new StringBuilder();
-		out.append(getScoreLine());
-		maybeAddHelpfulHints(out);
+		if(failures.isEmpty()) {
+			out.append(getScoreLine());
+			maybeAddHelpfulHints(out);
+		} else {
+			out.append("Uh-oh! There was an error while trying to grade your code! Please read the error message carefully - there might be something you're doing wrong!\n");
+			for(String failure : failures) {
+				out.append(failure).append('\n');
+			}
+		}
 		return out.toString();
 	}
 	
@@ -98,7 +106,7 @@ public class JUnitAutograderResult extends AutograderResult {
 			}
 			if(exceptCauseIs(failure.getException(), NoSuchMethodError.class) 
 					|| exceptCauseIs(failure.getException(), NoSuchMethodException.class)) {
-				localbuilder.append("Missing Method: " + failure.getMessage() + "\n");
+				localbuilder.append("Wrong method used: " + failure.getMessage() + "\n");
 			}
 			if(failure.getMessage() != null && failure.getMessage().contains("Unresolved compilation")) {
 				localbuilder.append(failure.getTestHeader() + ":" + failure.getMessage() + "\n");
@@ -156,5 +164,9 @@ public class JUnitAutograderResult extends AutograderResult {
 	@Override
 	public int getNumberOfTests() {
 		return this.totalTests;
+	}
+	
+	public void addRunFailure(String failureMessage) {
+		failures.add(failureMessage);
 	}
 }

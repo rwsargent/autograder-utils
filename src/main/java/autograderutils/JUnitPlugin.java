@@ -6,8 +6,6 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;
@@ -16,29 +14,27 @@ import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
 
 import autograderutils.annotations.Autograder;
-import autograderutils.annotations.Group;
-import autograderutils.annotations.Groups;
 import autograderutils.results.JUnitAutograderResult;
 
 /**
  * Used to run a JUnit test suite and pipe its results to stdout. 
- * These path arguments must be absolute due to the nature of the Autograder grading portion.
- * 
- * If no groups are neccessary, the second argument needs to be the number of total possible pints in the grader script. 
- * The @Autograder annotation will default to "Autograder," but the extra.properites file is always necessary.
- *
  * @author ryans
  *
  */
 public class JUnitPlugin {
 	public JUnitAutograderResult grade(Class<?> junitGradingClass) {
-		// Grab the toal number of points from 
-//		Map<String, Integer> totalGroupPoints = getGroups(junitGradingClass);
-		
+		Result junitResult;
 		Metadata metadata = Metadata.from(junitGradingClass);
-		JUnitCore core = new JUnitCore();
-		core.addListener(new RunListener());
-		Result junitResult = core.run(junitGradingClass);
+		try {
+			JUnitCore core = new JUnitCore();
+			core.addListener(new RunListener());
+			junitResult = core.run(junitGradingClass);
+		} catch(Throwable t) {
+			junitResult = new Result();
+			JUnitAutograderResult failResult = new JUnitAutograderResult(metadata, junitResult);
+			failResult.addRunFailure(t.getMessage());
+			return failResult;
+		}
 		JUnitAutograderResult autoResult = new JUnitAutograderResult(metadata, junitResult);
 		
 		for(Failure failure : junitResult.getFailures()) { 
@@ -78,32 +74,6 @@ public class JUnitPlugin {
 			return stackTrace[0].toString();
 		}
 		return "";
-	}
-
-	private Map<String, Integer> getGroups(Class<?> junitGradingClass) {
-		Map<String, Integer> groupToPoints = new HashMap<>();
-		Group[] groups = getGroupAnnotations(junitGradingClass);
-		
-		for(Group group : groups) {
-			groupToPoints.put(group.name(), group.totalPoints());
-		}
-		
-		return groupToPoints;
-	}
-
-	private Group[] getGroupAnnotations(Class<?> junitGradingClass) {
-		Group[] groups = null; 
-		Groups groupsAnno = junitGradingClass.getAnnotation(Groups.class);
-		if(groupsAnno == null) {
-			Group group = junitGradingClass.getAnnotation(Group.class);
-			if(group == null) {
-				throw new IllegalStateException("There are no Autograder group annotations on " + junitGradingClass.getName());
-			}
-			groups =  new Group[]{group};
-		} else {
-			groups = groupsAnno.value();
-		}
-		return groups;
 	}
 
 	private boolean isAnnotationPresent(Description description, Annotation anno) {
