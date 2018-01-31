@@ -69,7 +69,7 @@ public class JUnitAutograderResult extends AutograderResult {
 	}
 	
 	public String getScoreLine() {
-		return "Your submission received " + calculateScore() + " out of " + totalPoints + " points possible.\n" + 
+		return "Your submission passed " + calculateScore() + " out of " + totalPoints + " tests possible.\n" + 
                 "Your canvas score will reflect this percentage.\n";
 	}
 	

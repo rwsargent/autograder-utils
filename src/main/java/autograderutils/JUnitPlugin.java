@@ -24,13 +24,15 @@ import autograderutils.results.JUnitAutograderResult;
 public class JUnitPlugin {
 	public JUnitAutograderResult grade(Class<?> junitGradingClass) {
 		Result junitResult;
-		Metadata metadata = Metadata.from(junitGradingClass);
+		Metadata metadata;
 		try {
+			metadata = Metadata.from(junitGradingClass);
 			JUnitCore core = new JUnitCore();
 			core.addListener(new RunListener());
 			junitResult = core.run(junitGradingClass);
 		} catch(Throwable t) {
 			junitResult = new Result();
+			metadata = new Metadata();
 			JUnitAutograderResult failResult = new JUnitAutograderResult(metadata, junitResult);
 			failResult.addRunFailure(t.getMessage());
 			return failResult;
